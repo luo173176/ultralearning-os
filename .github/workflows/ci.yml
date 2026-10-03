@@ -37,6 +37,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
@@ -61,6 +62,17 @@ jobs:
 
       - name: Build for production server
         run: pnpm build
+
+      # 显式起服务并就绪探测：Playwright 以复用模式连接，
+      # 规避其清理 webServer 进程树时被残留的 next-server 卡死的问题
+      - name: Start production server
+        run: |
+          pnpm start &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3000 >/dev/null && echo "server ready" && exit 0
+            sleep 1
+          done
+          echo "server failed to start" && exit 1
 
       - name: Run E2E smoke
         run: pnpm test:e2e
