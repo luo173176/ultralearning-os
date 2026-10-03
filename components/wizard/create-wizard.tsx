@@ -62,7 +62,8 @@ export function CreateWizard() {
   });
 
   const errors = form.formState.errors;
-  const values = form.watch();
+  // 确认页展示用快照：getValues 不建立订阅，避免 watch 引发的重渲染风暴
+  const values = form.getValues();
   const topics = values.topics ?? [];
   const resources = values.resources ?? [];
   const checklistTotal = PRINCIPLES.reduce(
@@ -95,7 +96,12 @@ export function CreateWizard() {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    // 提交永远由「创建项目」按钮显式触发（见 footer），
+    // form 本身禁止隐式提交：避免步骤切换时点击落到换入的 submit 按钮上、
+    // 或在输入框里按回车导致重复创建
+    <form
+      onSubmit={(e) => e.preventDefault()}
+    >
       {/* 步骤条 */}
       <ol className="flex items-center gap-2">
         {STEPS.map((label, i) => (
@@ -439,11 +445,17 @@ export function CreateWizard() {
           上一步
         </Button>
         {step < STEPS.length - 1 ? (
-          <Button type="button" onClick={next}>
+          <Button type="button" onClick={next} disabled={pending}>
             下一步
           </Button>
         ) : (
-          <Button type="submit" disabled={pending}>
+          // type="button" + 显式 handleSubmit：不依赖表单隐式提交，
+          // 即使步骤切换的瞬间点击落错按钮，也不会触发重复创建
+          <Button
+            type="button"
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={pending}
+          >
             {pending && <Loader2 className="size-4 animate-spin" />}
             创建项目
           </Button>

@@ -40,7 +40,8 @@ export function ReviewQueue({
   const [flipped, setFlipped] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-
+  // 本轮已评分张数：评分后刷新会让队列为空，用它区分「本来就没卡」和「复习完了」
+  const [gradedCount, setGradedCount] = useState(0);
   // 评分后本地展示的最新间隔（仅提示用）
   const [lastInterval, setLastInterval] = useState<number | null>(null);
 
@@ -57,6 +58,7 @@ export function ReviewQueue({
         return;
       }
       setLastInterval(res.data?.intervalDays ?? null);
+      setGradedCount((n) => n + 1);
       setFlipped(false);
       const nextIndex = index + 1;
       setIndex(nextIndex);
@@ -65,6 +67,21 @@ export function ReviewQueue({
   }
 
   if (total === 0) {
+    if (gradedCount > 0) {
+      return (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+            <PartyPopper className="size-8 text-emerald-600" />
+            <p className="text-sm font-medium">本轮 {gradedCount} 张全部复习完</p>
+            {lastInterval != null && (
+              <p className="text-sm text-muted-foreground">
+                最后一张下次复习：{describeInterval(lastInterval)}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      );
+    }
     return (
       <Card>
         <CardContent className="flex flex-col items-center gap-3 py-12 text-center">

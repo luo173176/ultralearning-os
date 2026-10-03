@@ -32,9 +32,10 @@ pnpm dev        # 打开 http://localhost:3000
 常用命令：
 
 ```bash
-pnpm lint     # ESLint
-pnpm test     # Vitest 单元测试
-pnpm build    # 生产构建
+pnpm lint         # ESLint
+pnpm test         # Vitest 单元测试
+pnpm build        # 生产构建
+pnpm test:e2e     # Playwright E2E 冒烟（先 pnpm build）
 ```
 
 ## 技术栈
@@ -43,11 +44,11 @@ Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · shadcn/ui · Prisma +
 
 ## 数据与隐私
 
-所有数据保存在本地 `prisma/dev.db` 单文件中：没有账号、没有上传、没有遥测。`/settings` 页可随时导出 Markdown / JSON / CSV（导出功能随 v0.1.0 提供）。
+所有数据保存在本地 `prisma/dev.db` 单文件中：没有账号、没有上传、没有遥测。项目仪表盘可随时导出 Markdown（可读报告）与 JSON（完整备份）。
 
 ## 项目状态与路线图
 
-当前处于 **v0.1.0（MVP）开发中**，按阶段推进：
+**当前版本 v0.1.0（MVP）已发布**：
 
 | 阶段 | 内容 | 状态 |
 |---|---|---|
@@ -56,9 +57,9 @@ Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · shadcn/ui · Prisma +
 | 2 | 专注：学习会话与番茄钟 | ✅ |
 | 3 | 提取：闪卡与 SM-2、检索练习 | ✅ |
 | 4 | 直接性与钻练 | ✅ |
-| 5 | 九原则仪表盘与导出 | 🚧 |
+| 5 | 九原则仪表盘与导出 | ✅ |
 
-完整设计见 [docs/PLAN.md](docs/PLAN.md)，阶段计划见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+完整设计见 [docs/PLAN.md](docs/PLAN.md)，架构说明见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)，参与贡献见 [CONTRIBUTING.md](CONTRIBUTING.md)。后续 v0.2（反馈/直觉/复盘/CSV）、v0.3（实验/英文）按 ROADMAP 推进。
 
 ## 说明与致谢
 
