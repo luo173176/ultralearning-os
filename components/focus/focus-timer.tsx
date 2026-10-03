@@ -25,6 +25,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   elapsedMs,
@@ -54,11 +61,18 @@ const PRESETS = [5, 15, 25, 50, 90];
 const QUICK_REASONS = ["手机", "他人打扰", "杂念走神", "离开座位", "其他"];
 const BREAK_MINUTES = 5;
 
-export function FocusTimer({ projectId }: { projectId: string }) {
+export function FocusTimer({
+  projectId,
+  practices,
+}: {
+  projectId: string;
+  practices: { id: string; title: string }[];
+}) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [selectedMinutes, setSelectedMinutes] = useState(25);
+  const [selectedPractice, setSelectedPractice] = useState("none");
   const [pending, startTransition] = useTransition();
 
   const [finishOpen, setFinishOpen] = useState(false);
@@ -73,6 +87,7 @@ export function FocusTimer({ projectId }: { projectId: string }) {
   const {
     sessionId,
     projectId: activeProjectId,
+    practiceId: activePracticeId,
     startedAtMs,
     plannedMinutes,
     status,
@@ -120,11 +135,15 @@ export function FocusTimer({ projectId }: { projectId: string }) {
 
   function begin() {
     startTransition(async () => {
-      const res = await startSession(projectId, { plannedMinutes: selectedMinutes });
+      const res = await startSession(projectId, {
+        plannedMinutes: selectedMinutes,
+        practiceId: selectedPractice === "none" ? null : selectedPractice,
+      });
       if (!res.ok || !res.data) return;
       start({
         sessionId: res.data.sessionId,
         projectId,
+        practiceId: selectedPractice === "none" ? null : selectedPractice,
         startedAtMs: Date.parse(res.data.startedAtIso),
         plannedMinutes: selectedMinutes,
       });
@@ -229,6 +248,29 @@ export function FocusTimer({ projectId }: { projectId: string }) {
             {pending && <Loader2 className="size-4 animate-spin" />}
             开始专注
           </Button>
+          {practices.length > 0 && (
+            <div className="flex w-full max-w-sm flex-col gap-1.5">
+              <Label htmlFor="focus-practice" className="text-xs text-muted-foreground">
+                挂到直接练习（可选）——练什么，记在什么头上
+              </Label>
+              <Select
+                value={selectedPractice}
+                onValueChange={setSelectedPractice}
+              >
+                <SelectTrigger id="focus-practice" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">不挂接</SelectItem>
+                  {practices.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
             进行中可随时记录分心；结束时会请你给专注度打分（可选）。
           </p>
@@ -273,6 +315,12 @@ export function FocusTimer({ projectId }: { projectId: string }) {
             已专注 {Math.floor(elapsed / 60_000)} 分钟 · 开始于{" "}
             {startedAtMs ? formatDateTime(new Date(startedAtMs)) : "—"} · 分心{" "}
             {interruptions.length} 次
+            {activePracticeId && (
+              <>
+                {" "}
+                · 练习：{practices.find((p) => p.id === activePracticeId)?.title ?? "已挂接"}
+              </>
+            )}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-2">

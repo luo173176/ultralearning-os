@@ -15,12 +15,19 @@ export default async function FocusPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const sessions = await db.session.findMany({
-    where: { projectId: id },
-    orderBy: { startedAt: "desc" },
-    take: 30,
-    include: { interruptions: true },
-  });
+  const [sessions, practices] = await Promise.all([
+    db.session.findMany({
+      where: { projectId: id },
+      orderBy: { startedAt: "desc" },
+      take: 30,
+      include: { interruptions: true, practice: { select: { title: true } } },
+    }),
+    db.directPractice.findMany({
+      where: { projectId: id, status: { not: "DONE" } },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, title: true },
+    }),
+  ]);
   const stats = weekStats(sessions);
 
   return (
@@ -33,7 +40,7 @@ export default async function FocusPage({
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_240px]">
-        <FocusTimer projectId={id} />
+        <FocusTimer projectId={id} practices={practices} />
         <Card className="self-start">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">近 7 天</CardTitle>
@@ -72,6 +79,9 @@ export default async function FocusPage({
                   <Badge variant="outline">未结束</Badge>
                 )}
                 <Badge variant="outline">计划 {s.plannedMinutes} 分钟</Badge>
+                {s.practice && (
+                  <Badge variant="outline">练习：{s.practice.title}</Badge>
+                )}
                 {s.interruptions.length > 0 && (
                   <Badge variant="outline">分心 {s.interruptions.length} 次</Badge>
                 )}

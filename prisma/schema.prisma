@@ -123,6 +123,7 @@ model DirectPractice {
   status      String    @default("PLANNED") // PLANNED/IN_PROGRESS/DONE
   startedAt   DateTime?
   completedAt DateTime?
+  createdAt   DateTime  @default(now())
 
   sessions   Session[]
   weakPoints WeakPoint[]

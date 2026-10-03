@@ -1,6 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { calcResearchBudget } from "@/lib/domain";
+import {
+  calcResearchBudget,
+  DRILL_SLICE_LABELS,
+  DRILL_SLICE_TYPES,
+  DRILL_STATUSES,
+  DRILL_STATUS_META,
+  PRACTICE_FORMS,
+  PRACTICE_FORM_LABELS,
+  PRACTICE_STATUSES,
+  PRACTICE_STATUS_META,
+  WEAK_POINT_SOURCE_LABELS,
+  WEAK_POINT_SOURCES,
+  WEAK_POINT_STATUSES,
+  WEAK_POINT_STATUS_META,
+} from "@/lib/domain";
 import { wizardSchema } from "@/lib/validators/project";
 
 describe("10% 研究规则", () => {
@@ -54,5 +68,24 @@ describe("项目创建校验", () => {
       resources: [{ title: "书", url: "", type: "BOOK", isBenchmark: false }],
     });
     expect(r.success).toBe(true);
+  });
+});
+
+describe("阶段 4 领域标签完整性", () => {
+  it("每种练习形态都有中文标签", () => {
+    for (const f of PRACTICE_FORMS) expect(PRACTICE_FORM_LABELS[f]).toBeTruthy();
+  });
+
+  it("练习/弱点/钻练状态都有元数据", () => {
+    for (const s of PRACTICE_STATUSES) expect(PRACTICE_STATUS_META[s]).toBeTruthy();
+    for (const s of WEAK_POINT_STATUSES) expect(WEAK_POINT_STATUS_META[s]).toBeTruthy();
+    for (const s of DRILL_STATUSES) expect(DRILL_STATUS_META[s]).toBeTruthy();
+  });
+
+  it("五种钻练切片与弱点来源都有标签", () => {
+    for (const t of DRILL_SLICE_TYPES) expect(DRILL_SLICE_LABELS[t]).toBeTruthy();
+    for (const s of WEAK_POINT_SOURCES) {
+      expect(WEAK_POINT_SOURCE_LABELS[s]).toBeTruthy();
+    }
   });
 });

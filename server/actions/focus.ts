@@ -27,8 +27,23 @@ export async function startSession(
   if (!parsed.success) return { ok: false, error: firstError(parsed.error.issues) };
   if (!projectId) return { ok: false, error: "参数不合法" };
 
+  // 番茄钟可挂到某个直接练习下（Directness：练什么记在什么头上）
+  let practiceId: string | null = null;
+  if (parsed.data.practiceId) {
+    const practice = await db.directPractice.findFirst({
+      where: { id: parsed.data.practiceId, projectId },
+      select: { id: true },
+    });
+    if (!practice) return { ok: false, error: "关联的练习不存在" };
+    practiceId = practice.id;
+  }
+
   const session = await db.session.create({
-    data: { projectId, plannedMinutes: parsed.data.plannedMinutes },
+    data: {
+      projectId,
+      plannedMinutes: parsed.data.plannedMinutes,
+      practiceId,
+    },
     select: { id: true, startedAt: true },
   });
   refresh(projectId);

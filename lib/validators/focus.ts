@@ -6,6 +6,7 @@ export const startSessionSchema = z.object({
     .int()
     .min(1, "至少 1 分钟")
     .max(240, "一次别超过 240 分钟"),
+  practiceId: z.string().nullable(),
 });
 
 export const interruptionInputSchema = z.object({

@@ -76,6 +76,75 @@ export const PRACTICE_FORM_LABELS: Record<
   OVERKILL: "Overkill 挑战",
 };
 
+export const PRACTICE_STATUSES = ["PLANNED", "IN_PROGRESS", "DONE"] as const;
+export type PracticeStatus = (typeof PRACTICE_STATUSES)[number];
+export const PRACTICE_STATUS_META: Record<
+  PracticeStatus,
+  { label: string; badge: "default" | "secondary" | "outline" }
+> = {
+  PLANNED: { label: "计划中", badge: "secondary" },
+  IN_PROGRESS: { label: "进行中", badge: "default" },
+  DONE: { label: "已完成", badge: "outline" },
+};
+
+export const WEAK_POINT_SOURCES = [
+  "SELF",
+  "PRACTICE",
+  "FEEDBACK",
+  "RETRIEVAL",
+] as const;
+export type WeakPointSource = (typeof WEAK_POINT_SOURCES)[number];
+export const WEAK_POINT_SOURCE_LABELS: Record<WeakPointSource, string> = {
+  SELF: "自查发现",
+  PRACTICE: "来自练习",
+  FEEDBACK: "来自反馈",
+  RETRIEVAL: "来自检索错误",
+};
+
+export const WEAK_POINT_STATUSES = ["OPEN", "DRILLING", "RESOLVED"] as const;
+export type WeakPointStatus = (typeof WEAK_POINT_STATUSES)[number];
+export const WEAK_POINT_STATUS_META: Record<
+  WeakPointStatus,
+  { label: string; badge: "default" | "secondary" | "outline" | "destructive" }
+> = {
+  OPEN: { label: "未攻克", badge: "destructive" },
+  DRILLING: { label: "钻练中", badge: "default" },
+  RESOLVED: { label: "已解决", badge: "outline" },
+};
+
+export const DRILL_SLICE_TYPES = [
+  "TIME_SLICE",
+  "COGNITIVE_SLICE",
+  "COPYCAT",
+  "MAGNIFIER",
+  "PREREQUISITE",
+] as const;
+export type DrillSliceType = (typeof DRILL_SLICE_TYPES)[number];
+export const DRILL_SLICE_LABELS: Record<DrillSliceType, string> = {
+  TIME_SLICE: "时间切片",
+  COGNITIVE_SLICE: "认知切片",
+  COPYCAT: "复制模仿",
+  MAGNIFIER: "放大镜法",
+  PREREQUISITE: "前提隔离",
+};
+
+export const DRILL_STATUSES = [
+  "TODO",
+  "DOING",
+  "AWAIT_VERIFY",
+  "DONE",
+] as const;
+export type DrillStatus = (typeof DRILL_STATUSES)[number];
+export const DRILL_STATUS_META: Record<
+  DrillStatus,
+  { label: string; badge: "default" | "secondary" | "outline" | "destructive" }
+> = {
+  TODO: { label: "待开始", badge: "secondary" },
+  DOING: { label: "钻练中", badge: "default" },
+  AWAIT_VERIFY: { label: "待验证", badge: "destructive" },
+  DONE: { label: "已验证", badge: "outline" },
+};
+
 // ---------- 领域规则 ----------
 
 /** 10% 研究规则：研究预算 = 计划总时长的 10%，向上取整 */

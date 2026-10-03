@@ -17,6 +17,7 @@ export type PendingInterruption = {
 type TimerState = {
   sessionId: string | null;
   projectId: string | null;
+  practiceId: string | null;
   startedAtMs: number | null;
   plannedMinutes: number;
   status: "idle" | "running" | "paused";
@@ -26,6 +27,7 @@ type TimerState = {
   start: (p: {
     sessionId: string;
     projectId: string;
+    practiceId: string | null;
     startedAtMs: number;
     plannedMinutes: number;
   }) => void;
@@ -40,6 +42,7 @@ export const useTimerStore = create<TimerState>()(
     (set) => ({
       sessionId: null,
       projectId: null,
+      practiceId: null,
       startedAtMs: null,
       plannedMinutes: 25,
       status: "idle",
@@ -83,6 +86,7 @@ export const useTimerStore = create<TimerState>()(
         set({
           sessionId: null,
           projectId: null,
+          practiceId: null,
           startedAtMs: null,
           status: "idle",
           pausedElapsedMs: 0,

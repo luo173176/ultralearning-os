@@ -10,8 +10,8 @@ const ITEMS = [
   { href: "/map", label: "学习地图", ready: true },
   { href: "/focus", label: "学习会话", ready: true },
   { href: "/retrieval", label: "检索", ready: true },
-  { href: "/direct", label: "直接练习", ready: false, stage: "阶段 4" },
-  { href: "/drill", label: "钻练", ready: false, stage: "阶段 4" },
+  { href: "/direct", label: "直接练习", ready: true },
+  { href: "/drill", label: "钻练", ready: true },
   { href: "/dashboard", label: "九原则仪表盘", ready: false, stage: "阶段 5" },
 ] as const;
 
