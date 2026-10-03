@@ -10,6 +10,40 @@
       name="description"
       content="把《Ultralearning》九大原则变成可执行学习工作流的本地优先应用"
     />
+    <script>
+      // 白屏兜底：应用启动崩溃时给出可见提示与重试入口，而不是一片空白。
+      (function () {
+        window.__bootErrors = [];
+        window.addEventListener("error", function (e) {
+          window.__bootErrors.push(String((e && e.error && e.error.stack) || e.message));
+          try {
+            localStorage.setItem("__bootErrors", JSON.stringify(window.__bootErrors.slice(-3)));
+          } catch (_) {}
+        });
+        window.addEventListener("unhandledrejection", function (e) {
+          window.__bootErrors.push(String(e.reason && e.reason.stack || e.reason));
+        });
+        setTimeout(function () {
+          var root = document.getElementById("root");
+          if (root && root.children.length === 0) {
+            var errs = [];
+            try { errs = JSON.parse(localStorage.getItem("__bootErrors") || "[]"); } catch (_) {}
+            var box = document.createElement("div");
+            box.style.cssText =
+              "max-width:480px;margin:80px auto;padding:24px;border:1px solid #f59e0b;border-radius:12px;font-family:system-ui;text-align:center";
+            box.innerHTML =
+              '<div style="font-size:32px">⚠️</div>' +
+              '<h2 style="margin:12px 0 8px;font-size:16px">应用启动失败</h2>' +
+              '<p style="margin:0 0 16px;font-size:13px;color:#666">通常是网络或缓存问题，点击重试即可；若反复出现，请截图下方信息反馈。</p>' +
+              '<button onclick="location.reload()" style="padding:8px 24px;border-radius:8px;border:0;background:#1c1917;color:#fff;font-size:14px;cursor:pointer">重新加载</button>' +
+              '<pre style="margin-top:16px;text-align:left;font-size:10px;color:#999;white-space:pre-wrap;max-height:160px;overflow:auto">' +
+              (errs.join("\n---\n") || "未捕获到错误信息") +
+              "</pre>";
+            document.body.appendChild(box);
+          }
+        }, 6000);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

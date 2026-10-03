@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-import { db } from "./db";
+import { subscribeDataChanged } from "./events";
 
 /**
- * 响应式数据查询：初始加载一次 + 数据库任何写入时自动重查。
+ * 响应式数据查询：初始加载一次 + 存储层任何写入（notifyDataChanged）时自动重查。
  * 等价于本地版 Server Component 直读 + revalidatePath 的组合。
  * fn 每次渲染需为稳定引用（组件内用 useCallback），deps 变化时重查。
  */
@@ -32,10 +32,7 @@ export function useDbQuery<T>(
     const onChange = () => {
       fn().then((r) => setData(r));
     };
-    db.on("changes").subscribe(onChange);
-    return () => {
-      db.on("changes").unsubscribe(onChange);
-    };
+    return subscribeDataChanged(onChange);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 

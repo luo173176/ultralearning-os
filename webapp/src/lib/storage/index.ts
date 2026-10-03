@@ -32,6 +32,7 @@ import {
   wizardSchema,
 } from "@/lib/validators/project";
 
+import { notifyDataChanged } from "./events";
 import { db, now, uid, type DbPractice, type DbProject } from "./db";
 
 function firstError(issues: { message: string }[]): string {
@@ -150,6 +151,7 @@ export async function createProject(raw: unknown): Promise<ActionResult<{ id: st
       );
     },
   );
+  notifyDataChanged();
   return { ok: true, data: { id } };
 }
 
@@ -174,6 +176,7 @@ export async function updateProject(
     deadline,
     updatedAt: now(),
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -185,6 +188,7 @@ export async function changeProjectStatus(
     return { ok: false, error: "未知状态" };
   }
   await db.projects.update(projectId, { status, updatedAt: now() });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -234,6 +238,7 @@ export async function deleteProject(projectId: string): Promise<ActionResult> {
       ]);
     },
   );
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -254,6 +259,7 @@ export async function addTopicItem(
     notes: null,
     sortOrder: count,
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -267,6 +273,7 @@ export async function updateTopicItem(
   const item = await db.topicItems.get(itemId);
   if (!item || item.projectId !== projectId) return { ok: false, error: "主题不存在" };
   await db.topicItems.update(itemId, parsed.data);
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -275,6 +282,7 @@ export async function deleteTopicItem(
   itemId: string,
 ): Promise<ActionResult> {
   await db.topicItems.delete(itemId);
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -294,6 +302,7 @@ export async function addResource(
     notes: null,
     createdAt: now(),
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -303,6 +312,7 @@ export async function toggleResourceBenchmark(
   isBenchmark: boolean,
 ): Promise<ActionResult> {
   await db.resources.update(resourceId, { isBenchmark });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -311,6 +321,7 @@ export async function deleteResource(
   resourceId: string,
 ): Promise<ActionResult> {
   await db.resources.delete(resourceId);
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -326,6 +337,7 @@ export async function addInterviewNote(
     ...parsed.data,
     createdAt: now(),
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -334,6 +346,7 @@ export async function deleteInterviewNote(
   noteId: string,
 ): Promise<ActionResult> {
   await db.interviews.delete(noteId);
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -368,6 +381,7 @@ export async function startSession(
     focusRating: null,
     note: null,
   });
+  notifyDataChanged();
   return { ok: true, data: { sessionId, startedAtIso: startedAt.toISOString() } };
 }
 
@@ -381,6 +395,7 @@ export async function addInterruption(
   const session = await db.sessions.get(sessionId);
   if (!session || session.projectId !== projectId) return { ok: false, error: "会话不存在" };
   await db.interruptions.add({ id: uid(), sessionId, ...parsed.data, at: now() });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -406,6 +421,7 @@ export async function finishSession(
     focusRating: parsed.data.focusRating,
     note: parsed.data.note || null,
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -417,6 +433,7 @@ export async function discardSession(
     await db.interruptions.where("sessionId").equals(sessionId).delete();
     await db.sessions.delete(sessionId);
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -441,6 +458,7 @@ export async function createCard(
     lapses: 0,
     suspended: false,
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -456,6 +474,7 @@ export async function updateCard(
     back: parsed.data.back,
     topicItemId: parsed.data.topicItemId || null,
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -465,6 +484,7 @@ export async function setCardSuspended(
   suspended: boolean,
 ): Promise<ActionResult> {
   await db.cards.update(cardId, { suspended });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -476,6 +496,7 @@ export async function deleteCard(
     await db.reviewLogs.where("cardId").equals(cardId).delete();
     await db.cards.delete(cardId);
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -518,6 +539,7 @@ export async function reviewCard(
       easeFactor: next.easeFactor,
     });
   });
+  notifyDataChanged();
   return { ok: true, data: { intervalDays: next.intervalDays } };
 }
 
@@ -539,6 +561,7 @@ export async function createRetrievalExercise(
     coverage: parsed.data.coverage,
     createdAt: now(),
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -547,6 +570,7 @@ export async function deleteRetrievalExercise(
   exerciseId: string,
 ): Promise<ActionResult> {
   await db.retrievalExercises.delete(exerciseId);
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -569,6 +593,7 @@ export async function createPractice(
     completedAt: null,
     createdAt: now(),
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -589,6 +614,7 @@ export async function changePracticeStatus(
   if (status.data === "DONE") data.completedAt = now();
   if (status.data === "PLANNED") data.completedAt = null;
   await db.directPractices.update(practiceId, data);
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -604,6 +630,7 @@ export async function deletePractice(
     await Promise.all(wps.map((w) => db.weakPoints.update(w.id, { practiceId: null })));
     await db.directPractices.delete(practiceId);
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -625,6 +652,7 @@ export async function addWeakPoint(
     status: "OPEN",
     createdAt: now(),
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -633,6 +661,7 @@ export async function resolveWeakPoint(
   weakPointId: string,
 ): Promise<ActionResult> {
   await db.weakPoints.update(weakPointId, { status: "RESOLVED" });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -644,6 +673,7 @@ export async function deleteWeakPoint(
     await db.drillTasks.where("weakPointId").equals(weakPointId).delete();
     await db.weakPoints.delete(weakPointId);
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -673,6 +703,7 @@ export async function createDrillTask(
       await db.weakPoints.update(weakPointId, { status: "DRILLING" });
     }
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -685,6 +716,7 @@ export async function changeDrillStatus(
     return { ok: false, error: "未知状态" };
   }
   await db.drillTasks.update(drillId, { status: rawStatus, completedAt: null, result: null });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -714,6 +746,7 @@ export async function verifyDrill(
       await db.weakPoints.update(drill.weakPointId, { status: "RESOLVED" });
     }
   });
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -722,6 +755,7 @@ export async function deleteDrill(
   drillId: string,
 ): Promise<ActionResult> {
   await db.drillTasks.delete(drillId);
+  notifyDataChanged();
   return { ok: true };
 }
 
@@ -733,5 +767,6 @@ export async function toggleChecklistItem(
   isDone: boolean,
 ): Promise<ActionResult> {
   await db.checklistItems.update(itemId, { isDone });
+  notifyDataChanged();
   return { ok: true };
 }

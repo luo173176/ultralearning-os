@@ -1,5 +1,7 @@
 import Dexie, { type Table } from "dexie";
 
+import { notifyDataChanged } from "./events";
+
 // 网页版数据层：IndexedDB（Dexie），表结构与 prisma/schema.prisma 一一对应。
 // 日期一律存 Date 对象（IndexedDB 原生支持），组件层的类型与本地版完全一致。
 // 枚举仍为 String + lib/validators 的 Zod 校验（与本地版同一套）。
@@ -276,4 +278,5 @@ export async function wipeAll(): Promise<void> {
       ]);
     },
   );
+  notifyDataChanged();
 }
