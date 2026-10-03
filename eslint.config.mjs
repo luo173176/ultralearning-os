@@ -10,6 +10,7 @@ const eslintConfig = [
   {
     ignores: [
       "node_modules/**",
+      "webapp/**",
       ".next/**",
       "out/**",
       "build/**",
