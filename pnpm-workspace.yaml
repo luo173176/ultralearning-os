@@ -1,0 +1,7 @@
+# pnpm 配置（pnpm 10+ 的配置文件，即使非 monorepo 也用这里）
+# 依赖的构建脚本默认被阻止，用 allowBuilds 逐个放行（pnpm 12 的机制）。
+# 阶段 1 接入 Prisma 时在此追加 prisma、@prisma/engines、@prisma/client。
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
