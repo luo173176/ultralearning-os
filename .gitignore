@@ -40,3 +40,8 @@ prisma/*.db-journal
 
 # exports（用户导出文件）
 /exports
+
+# webapp 构建产物
+webapp/dist
+webapp/dev-dist
+webapp/node_modules
