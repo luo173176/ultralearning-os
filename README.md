@@ -55,8 +55,8 @@ Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · shadcn/ui · Prisma +
 | 1 | 元学习：数据模型、项目 CRUD、创建向导、学习地图 | ✅ |
 | 2 | 专注：学习会话与番茄钟 | ✅ |
 | 3 | 提取：闪卡与 SM-2、检索练习 | ✅ |
-| 4 | 直接性与钻练 | 🚧 |
-| 5 | 九原则仪表盘与导出 | ⏳ |
+| 4 | 直接性与钻练 | ✅ |
+| 5 | 九原则仪表盘与导出 | 🚧 |
 
 完整设计见 [docs/PLAN.md](docs/PLAN.md)，阶段计划见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
