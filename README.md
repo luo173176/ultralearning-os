@@ -21,7 +21,7 @@ Ultralearning OS 是一个**本地优先**的开源学习项目管理系统。�
 
 ```bash
 pnpm install
-pnpm db:setup   # 初始化 SQLite 并写入演示数据（阶段 1 起可用）
+pnpm db:setup   # 应用迁移并写入演示数据
 pnpm dev        # 打开 http://localhost:3000
 ```
 
@@ -48,8 +48,8 @@ Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · shadcn/ui · Prisma +
 | 阶段 | 内容 | 状态 |
 |---|---|---|
 | 0 | 地基：脚手架、CI、规范 | ✅ |
-| 1 | 元学习：数据模型、项目 CRUD、创建向导、学习地图 | 🚧 |
-| 2 | 专注：学习会话与番茄钟 | ⏳ |
+| 1 | 元学习：数据模型、项目 CRUD、创建向导、学习地图 | ✅ |
+| 2 | 专注：学习会话与番茄钟 | 🚧 |
 | 3 | 提取：闪卡与 SM-2、检索练习 | ⏳ |
 | 4 | 直接性与钻练 | ⏳ |
 | 5 | 九原则仪表盘与导出 | ⏳ |

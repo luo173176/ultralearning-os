@@ -23,9 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files（.env 只放无密钥配置，随仓库提交；有密钥的用本地未跟踪文件）
 .env*
-!.env.example
+!.env
 
 # typescript
 *.tsbuildinfo

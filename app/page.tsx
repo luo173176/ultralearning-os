@@ -1,43 +1,67 @@
-import { t } from "@/lib/i18n";
-import { PRINCIPLES } from "@/lib/principles";
+import Link from "next/link";
+import { FolderKanban, Plus } from "lucide-react";
 
-export default function Home() {
+import { ProjectCard } from "@/components/project/project-card";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Button } from "@/components/ui/button";
+import { db } from "@/lib/db";
+import { t } from "@/lib/i18n";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const projects = await db.project.findMany({
+    orderBy: { updatedAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      why: true,
+      status: true,
+      category: true,
+      deadline: true,
+      _count: { select: { topicItems: true, resources: true } },
+    },
+  });
+
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">{t("app.name")}</h1>
-        <p className="mt-3 text-muted-foreground">{t("app.tagline")}</p>
+    <main className="mx-auto max-w-5xl px-6 py-12">
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {t("home.title")}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("home.subtitle")}
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/projects/new">
+            <Plus className="size-4" />
+            {t("nav.newProject")}
+          </Link>
+        </Button>
       </header>
 
-      <section className="mt-10 rounded-xl border bg-card p-6">
-        <p className="text-sm text-muted-foreground">
-          {t("home.stageNote")} — {t("home.comingSoon")}
-        </p>
+      <section className="mt-8">
+        {projects.length === 0 ? (
+          <EmptyState
+            icon={FolderKanban}
+            title={t("home.emptyTitle")}
+            description={t("home.emptyDescription")}
+            action={
+              <Button asChild>
+                <Link href="/projects/new">创建第一个项目</Link>
+              </Button>
+            }
+          />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {projects.map((p) => (
+              <ProjectCard key={p.id} project={p} />
+            ))}
+          </div>
+        )}
       </section>
-
-      <section className="mt-12">
-        <h2 className="text-xl font-semibold">{t("home.principlesTitle")}</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {PRINCIPLES.map((p) => (
-            <div key={p.key} className="rounded-lg border bg-card p-4">
-              <div className="flex items-baseline gap-2">
-                <span className="text-xs text-muted-foreground">
-                  #{p.order}
-                </span>
-                <span className="font-medium">{p.zh}</span>
-                <span className="text-xs text-muted-foreground">{p.en}</span>
-              </div>
-              <p className="mt-1.5 text-sm text-muted-foreground">
-                {p.tagline}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <footer className="mt-16 text-xs text-muted-foreground">
-        {t("home.footer")}
-      </footer>
     </main>
   );
 }

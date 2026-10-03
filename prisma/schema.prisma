@@ -1,0 +1,279 @@
+// ultralearning-os 数据模型 v1（docs/PLAN.md 第 6 节）
+// 注意：SQLite 下 Prisma 不支持 enum/Json，枚举一律 String + Zod 校验（lib/domain.ts）。
+// 未来切 Postgres：provider 改 "postgresql"，url 改 env("DATABASE_URL")，String 枚举可升级原生 enum。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  // 本地优先：直接用相对路径的 SQLite 文件，零配置启动
+  url = "file:./dev.db"
+}
+
+model Project {
+  id             String    @id @default(cuid())
+  name           String
+  why            String? // Why：为什么学（动机）
+  what           String? // What：学成什么样（能力清单/预期产出）
+  how            String? // How：用什么方法与资源
+  category       String    @default("OTHER") // LANGUAGE/CODING/EXAM/SKILL/OTHER
+  status         String    @default("ACTIVE") // ACTIVE/PAUSED/COMPLETED/ARCHIVED
+  plannedHours   Int       @default(0)
+  researchBudget Int       @default(0) // 10% 研究规则预算（小时）
+  deadline       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  topicItems   TopicItem[]
+  resources    Resource[]
+  interviews   InterviewNote[]
+  sessions     Session[]
+  practices    DirectPractice[]
+  weakPoints   WeakPoint[]
+  drills       DrillTask[]
+  cards        Card[]
+  exercises    RetrievalExercise[]
+  feedbacks    FeedbackEntry[]
+  feynmanNotes FeynmanNote[]
+  experiments  Experiment[]
+  review       ProjectReview?
+  checklist    ChecklistItem[]
+
+  @@index([status])
+}
+
+// 概念 / 事实 / 程序 三类主题（元学习地图）
+model TopicItem {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  kind      String // CONCEPT/FACT/PROCEDURE
+  mastery   Int     @default(0) // 0未学 1学习中 2可输出 3可教别人
+  notes     String?
+  sortOrder Int     @default(0)
+
+  cards Card[]
+
+  @@index([projectId, kind])
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  url         String?
+  type        String   @default("OTHER") // COURSE/BOOK/VIDEO/MENTOR/COMMUNITY/OTHER
+  isBenchmark Boolean  @default(false) // 基准资源：用来对照"高手做到什么程度"
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model InterviewNote {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  expert    String
+  content   String // 内置模板问题的回答记录
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model Session {
+  id             String          @id @default(cuid())
+  projectId      String
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  practiceId     String? // 可挂到某个直接练习下
+  practice       DirectPractice? @relation(fields: [practiceId], references: [id])
+  startedAt      DateTime        @default(now())
+  endedAt        DateTime?
+  plannedMinutes Int             @default(25)
+  actualMinutes  Int?
+  focusRating    Int? // 1-5 结束自评
+  note           String?
+
+  interruptions Interruption[]
+
+  @@index([projectId, startedAt])
+}
+
+model Interruption {
+  id        String   @id @default(cuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  at        DateTime @default(now())
+  reason    String
+  seconds   Int      @default(0) // 分心耗时
+}
+
+// 直接练习：PROJECT/IMMERSION/SIMULATION/OVERKILL
+model DirectPractice {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  form        String
+  description String?
+  status      String    @default("PLANNED") // PLANNED/IN_PROGRESS/DONE
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  sessions   Session[]
+  weakPoints WeakPoint[]
+
+  @@index([projectId, status])
+}
+
+model WeakPoint {
+  id         String          @id @default(cuid())
+  projectId  String
+  project    Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  practiceId String? // 来源练习（可空）
+  practice   DirectPractice? @relation(fields: [practiceId], references: [id])
+  title      String
+  detail     String?
+  source     String          @default("SELF") // SELF/PRACTICE/FEEDBACK/RETRIEVAL
+  status     String          @default("OPEN") // OPEN/DRILLING/RESOLVED
+  createdAt  DateTime        @default(now())
+
+  drills DrillTask[]
+
+  @@index([projectId, status])
+}
+
+model DrillTask {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  weakPointId String
+  weakPoint   WeakPoint @relation(fields: [weakPointId], references: [id], onDelete: Cascade)
+  title       String
+  sliceType   String // TIME_SLICE/COGNITIVE_SLICE/COPYCAT/MAGNIFIER/PREREQUISITE
+  status      String    @default("TODO") // TODO/DOING/AWAIT_VERIFY(待回练习验证)/DONE
+  result      String? // 回到直接练习后的验证结论
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([projectId, status])
+}
+
+model Card {
+  id          String     @id @default(cuid())
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  topicItemId String?
+  topicItem   TopicItem? @relation(fields: [topicItemId], references: [id])
+  front       String
+  back        String
+  // SM-2 调度状态（lib/sm2.ts 纯函数维护，阶段 3 启用）
+  dueAt        DateTime @default(now())
+  intervalDays Int      @default(0)
+  easeFactor   Float    @default(2.5)
+  reps         Int      @default(0)
+  lapses       Int      @default(0)
+  suspended    Boolean  @default(false)
+
+  logs ReviewLog[]
+
+  @@index([projectId])
+  @@index([dueAt, suspended])
+}
+
+model ReviewLog {
+  id           String   @id @default(cuid())
+  cardId       String
+  card         Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  reviewedAt   DateTime @default(now())
+  grade        String // AGAIN/HARD/GOOD/EASY
+  intervalDays Int
+  easeFactor   Float
+
+  @@index([cardId])
+}
+
+// 检索练习：FREE_RECALL/QUESTION_BOOK/CLOSED_BOOK
+model RetrievalExercise {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kind      String
+  title     String
+  prompt    String? // 问题书：问题清单；闭卷：挑战说明
+  content   String? // 自由回忆默写内容 / 作答内容
+  coverage  Int? // 对照资料后的自评覆盖率 0-100
+  createdAt DateTime @default(now())
+
+  @@index([projectId, kind])
+}
+
+model FeedbackEntry {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type        String // OUTCOME/INFO/CORRECTIVE
+  source      String   @default("SELF") // SELF/MENTOR/PEER/TOOL
+  content     String
+  actionTaken String? // 针对这条反馈做了什么（可转弱点/钻练）
+  isMeta      Boolean  @default(false) // 元反馈：关于学习方法本身
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model FeynmanNote {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  topic       String
+  explanation String // 用大白话解释给外行听
+  depthScore  Int? // 1-5 解释深度自检
+  gaps        String? // 卡壳点 / 发现的理解漏洞
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model Experiment {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  question    String // 想验证什么
+  methodA     String?
+  methodB     String?
+  metric      String? // 用什么衡量
+  status      String    @default("RUNNING") // RUNNING/CONCLUDED
+  conclusion  String?
+  createdAt   DateTime  @default(now())
+  concludedAt DateTime?
+
+  @@index([projectId])
+}
+
+model ProjectReview {
+  id          String   @id @default(cuid())
+  projectId   String   @unique
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  decision    String // MAINTAIN/RELEARN/MASTER
+  summary     String
+  nextActions String? // 维持/重学/精通 的后续动作清单
+  createdAt   DateTime @default(now())
+}
+
+// 九原则检查清单：创建项目时由 lib/principles.ts 模板生成
+model ChecklistItem {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  principle Int // 1-9
+  text      String
+  isDone    Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  @@index([projectId, principle])
+}
