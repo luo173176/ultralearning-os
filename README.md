@@ -2,6 +2,10 @@
 
 > 把《Ultralearning》的九大原则，变成可执行、可追踪、可复盘的学习工作流。
 
+**🌐 网页版（推荐，手机可用）**：[https://luo173176.github.io/ultralearning-os/](https://luo173176.github.io/ultralearning-os/) —— 无需安装，数据存在你设备的浏览器里，支持"添加到主屏幕"与离线使用。手机与电脑数据相互独立，可用「数据与导出」页的全量备份在设备间迁移。
+
+**💻 本地版**：下方 Next.js + SQLite 方案，数据存本地文件。
+
 Ultralearning OS 是一个**本地优先**的开源学习项目管理系统。它不是又一个闪卡或待办工具，而是围绕「一个学习项目」的完整方法论脚手架：从开局画地图（元学习），到直接练习、钻练弱点、检索测试、收集反馈，直到项目复盘（维持 / 重学 / 精通）。
 
 ## 特性
@@ -58,6 +62,7 @@ Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · shadcn/ui · Prisma +
 | 3 | 提取：闪卡与 SM-2、检索练习 | ✅ |
 | 4 | 直接性与钻练 | ✅ |
 | 5 | 九原则仪表盘与导出 | ✅ |
+| 6 | 网页版（GitHub Pages，浏览器存储 + PWA） | ✅ |
 
 完整设计见 [docs/PLAN.md](docs/PLAN.md)，架构说明见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)，参与贡献见 [CONTRIBUTING.md](CONTRIBUTING.md)。后续 v0.2（反馈/直觉/复盘/CSV）、v0.3（实验/英文）按 ROADMAP 推进。
 
