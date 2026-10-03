@@ -25,6 +25,10 @@ pnpm db:setup   # 应用迁移并写入演示数据
 pnpm dev        # 打开 http://localhost:3000
 ```
 
+> 国内网络提示：若 `prisma generate` 下载引擎慢或失败，可在项目根目录创建 `.env`：
+> `PRISMA_ENGINES_MIRROR=https://registry.npmmirror.com/-/binary/prisma/` 和
+> `PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1`（该文件已被 gitignore，不会入库）。
+
 常用命令：
 
 ```bash
