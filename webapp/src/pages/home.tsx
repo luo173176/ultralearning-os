@@ -60,9 +60,7 @@ export function HomePage() {
         )}
       </section>
 
-      <footer className="mt-16 text-xs text-muted-foreground">
-        {t("home.footer")} · 数据保存在本设备的浏览器中
-      </footer>
+      <footer className="mt-16 text-xs text-muted-foreground">{t("home.footer")}</footer>
     </main>
   );
 }
